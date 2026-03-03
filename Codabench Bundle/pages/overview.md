@@ -1,69 +1,100 @@
 # Overview
 
-## Challenge Description
+<img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/paris-saclay.png" alt="Université Paris-Saclay" width="140" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/inrae.png" alt="INRAE" width="110" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/lisn.png" alt="LISN" width="140" />
 
-In this challenge, the goal is to automatically classify **grain varieties** from images of individual grains.
-
-In real agricultural settings, different grain varieties are often **sown together** in the same field. After harvest, the final proportions of each variety may change due to differences in growth, resistance to disease, or adaptation to the environment. To study these effects, it is important to identify which grain belongs to which variety after harvest.
-
-To address this problem, **hyperspectral imaging** is used. This type of imaging captures rich spectral information that makes it possible to distinguish between visually similar grain varieties. However, this data is complex and requires machine learning models to analyze it effectively.
-
-Participants are asked to build models that classify grain images into the correct variety.
+*Organized by **Université Paris-Saclay**, **INRAE**, & **LISN** — M1 AI Challenge 2025-26*
 
 ---
 
-## What Is the Task?
+##  Challenge Description
 
-* You are given images of **individual grains**.
-* Each image belongs to **one of 8 grain varieties**.
-* Your task is to predict the correct variety for each image.
+Welcome to the **Grain Variety Classification Challenge**!
 
-This is a **multi-class image classification** problem.
+In real agricultural settings, different grain varieties are often **sown together** in the same field. After harvest, the final proportions of each variety may change due to differences in growth, disease resistance, or adaptation to the local environment. To study these effects and ensure quality control, it is essential to **accurately identify which grain belongs to which variety** after harvest.
+
+To address this, **hyperspectral imaging** is used. Hyperspectral cameras capture rich spectral information far beyond what the human eye can see, making it possible to distinguish between visually similar grain varieties. However, this data is complex and high-dimensional — requiring **machine learning models** to analyze it effectively.
+
+**Your goal:** Build a model that classifies individual grain images into the correct variety.
+
+<img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/grain-gallery.png" alt="Sample grain images across 8 varieties" width="500" />
+
+*Sample grain images across the 8 varieties (3 per class). Each 252×252 image is captured at spectral bands [22, 53, 89].*
 
 ---
 
-## Who Can Participate?
+##  What Is the Task?
+
+- **Input:** A single 252 × 252 × 3 spectral image of one grain
+- **Output:** Predicted variety label (1–8)
+- **Problem type:** Multi-class image classification
+- **Classes:** 8 grain varieties
+- **Training images:** ~10,000+ (filtered by year)
+- **Evaluation metric:** Classification **Accuracy**
+- **Time constraint:** ≤ 20 minutes on Codabench GPU
+
+This is structured as a **yearly benchmark**: models are trained and evaluated on **2019** and **2020** data independently to assess generalization across crop years.
+
+---
+
+## 👥 Who Can Participate?
 
 This challenge is designed for:
 
-* Students in machine learning, computer vision, or data science
-* Researchers interested in agricultural data
-* Anyone who wants to practice image classification on real-world data
+- **Students** in machine learning, computer vision, or data science
+- **Researchers** interested in agricultural AI or hyperspectral imaging
+- **Anyone** who wants to practice image classification on real-world scientific data
 
-No prior experience with hyperspectral data is required.
-
----
-
-## How to Enter the Challenge
-
-1. Create an account on **Codabench**.
-2. Register for this competition.
-3. Download the **Starting Kit** to understand the baseline solution.
-4. Train your model and generate predictions.
-5. Submit your model through the **My Submissions** tab.
+**No prior experience with hyperspectral data is required.** The starter kit provides a complete working baseline.
 
 ---
 
-## What Will Be Evaluated?
+##  How to Enter the Challenge
 
-Your submissions will be evaluated using standard classification metrics.
+1. **Create an account** on [Codabench](https://www.codabench.org/) and register for this competition.
+2. **Download the Starting Kit** from the **Files** tab — it includes the dataset, baseline code, and documentation.
+3. **Explore the data** using the provided Jupyter notebook.
+4. **Train your model** — start from the ResNet-18 baseline or build your own.
+5. **Submit** your `model.py` as a ZIP through the **My Submissions** tab.
 
-* The main metric is **accuracy**.
-
-Details are provided on the **Evaluation** page.
+>  **Tip:** Open the starter notebook directly in Google Colab for a zero-setup experience:
+> [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/moujar/Grain-Challenge-M1-AI/blob/main/starter_kit/README.ipynb)
 
 ---
 
-## Credits
+##  What Will Be Evaluated?
 
-* **Data provider:** INRAE (French National Research Institute for Agriculture, Food and Environment)
-* **Challenge organization:** Teaching and research staff
-* **Platform:** Codabench
+Submissions are evaluated on **classification accuracy** — the percentage of test images correctly classified.
 
-We thank INRAE for making this dataset available for educational and research purposes.
+> `Accuracy = (Correct predictions) / (Total predictions)`
+
+Full details are on the **Evaluation** page. The leaderboard ranks participants by accuracy (higher is better).
+
+---
+
+## Baselines Provided
+
+Two baselines are included in the starting kit:
+
+- **Random Forest** — Handcrafted features (histograms + statistics + PCA) → sklearn classifier. Found in `model.py` in the Starting Kit. Ready to submit as-is.
+- **ResNet-18** — End-to-end CNN trained from scratch with data augmentation & Test-Time Augmentation (TTA). Found in the Starter Notebook.
+
+Participants are encouraged to **beat these baselines** using deeper architectures (EfficientNet, ViT, …), better augmentation, ensembling, or any other technique.
+
+---
+
+## Credits & Acknowledgments
+
+- **Academic institution:** [Université Paris-Saclay](https://www.universite-paris-saclay.fr/)
+- **Data provider:** [INRAE](https://www.inrae.fr/) (French National Research Institute for Agriculture, Food & Environment)
+- **Platform:** [Codabench](https://www.codabench.org/)
+
+**Challenge organizers:**
+Oudoum Ali Houmed · Abderrahmane Moujar · Daryl Okou · Olutola Paul · Ran Lu · Cristian-Ioan Bratu
+
+We thank **INRAE** for making this dataset available for educational and research purposes, and **Université Paris-Saclay** for supporting this initiative.
 
 ---
 
 ## Contact
 
-For questions related to the challenge, dataset, or rules, please contact the challenge organizers via the Codabench platform.
+For questions about the challenge, dataset, or rules, please contact the organizers via the **Codabench platform** or open an issue on [GitHub](https://github.com/moujar/Grain-Challenge-M1-AI).
