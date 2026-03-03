@@ -7,7 +7,7 @@
 
 ---
 
-## 📌 Challenge at a Glance
+## Challenge at a Glance
 
 | Aspect | Detail |
 |---|---|
@@ -20,7 +20,7 @@
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 Grain-Challenge-M1-AI/
@@ -49,7 +49,7 @@ Grain-Challenge-M1-AI/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & install
 
@@ -73,7 +73,7 @@ Or click the **Open in Colab** badge above to run in Google Colab — no local s
 
 ---
 
-## 📓 What's in the Starter Notebook?
+## What's in the Starter Notebook?
 
 The [`starter_kit/README.ipynb`](starter_kit/README.ipynb) notebook is a complete end-to-end pipeline:
 
@@ -87,7 +87,7 @@ The [`starter_kit/README.ipynb`](starter_kit/README.ipynb) notebook is a complet
 
 ---
 
-## 📤 Submission Format
+## Submission Format
 
 Package your solution as a **ZIP file**:
 
@@ -109,7 +109,7 @@ See [`starter_kit/submission/model.py`](starter_kit/submission/model.py) for a w
 
 ---
 
-## 🏗️ Baselines Provided
+## Baselines Provided
 
 | Model | Description |
 |---|---|
@@ -120,7 +120,7 @@ Participants are encouraged to beat these baselines using deeper architectures (
 
 ---
 
-## 👥 Organizers
+## Organizers
 
 | Member |
 |---|
@@ -133,7 +133,7 @@ Participants are encouraged to beat these baselines using deeper architectures (
 
 ---
 
-## 📜 License
+## License
 
 This project is part of the M1 AI Challenge 2025-26.  
 Data provided by **INRAE**. See the competition terms on Codabench for usage restrictions.
