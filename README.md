@@ -1,119 +1,40 @@
-# Grain Classification Challenge - M1 AI
+# Grain Challenge 2: Yearly Benchmark
+<a href="https://colab.research.google.com/github/moujar/Grain-Challenge-M1-AI/blob/fix/src/README.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-A complete implementation for the Grain AI Challenge focusing on multi-class classification of grain varieties from RGB images.
+### ResNet-18 Baseline for Grain Classification
+***
 
-## 📋 Overview
+Welcome to the Starting Kit for the **Grain Variety Classification Challenge**! 
 
-This project implements a deep learning solution for classifying grain varieties using RGB image data. The challenge involves:
-
-- **Task**: Multi-class classification of grain varieties from RGB images
-- **Data**: RGB images stored in `.npz` format with metadata in filenames
-- **Model**: Convolutional Neural Network (CNN) for image classification
-- **Evaluation**: Accuracy, precision, recall, and F1-score metrics
-
-## 🎯 Challenge Details
-
-### Data Structure
-
-Each `.npz` file contains:
-
-- `x`: RGB image array (H, W, 3)
-- `y`: Label/target value (grain variety number)
-
-Filenames contain metadata:
-
-- `grainID`: Unique grain identifier
-- `varietyNumber`: Grain variety class
-- `microplotID`: Microplot coordinates (x, y)
-- `timestamp`: Date and time information
-
-### Model Architecture
-
-The implementation uses a CNN architecture (`GrainCNN`) with:
-
-- 4 convolutional layers with batch normalization
-- Max pooling and adaptive pooling for variable image sizes
-- Dropout regularization
-- Fully connected layers for classification
-
-## 🚀 Quick Start
-
-### 1. Installation
-
-Install required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Download Dataset
-
-Download the dataset using the provided shell script:
-
-```bash
-# Make script executable (first time only)
-chmod +x download_dataset.sh
-
-# Download from URL
-./download_dataset.sh <DATASET_URL>
-
-# Or if you already have the zip file in ./data/, just extract it
-./download_dataset.sh
-```
-
-The script will:
-
-- Download the dataset zip file (if URL provided)
-- Extract it to `./data/Grain-Data-RGB/`
-- Show progress and file count
-- Ask if you want to remove the zip file after extraction
-
-### 3. Run the Notebooks
-
-Open and run the Jupyter notebooks:
-
-```bash
-jupyter notebook src/read_grain_rgb_data.ipynb
-```
-
-
-## 🔧 Usage
-
-### Training a Model
-
-```python
-from src.README import Data, Train, Visualize, Score
-
-# Load data
-data = Data(data_dir="./data/Grain-Data-RGB")
-data.load_data()
-
-# Visualize data
-visualize = Visualize(data=data)
-visualize.plot_data()
-
-# Train model
-train = Train(data=data, model_path="./models/grain_model.pth")
-history = train.train(epochs=20, batch_size=32, learning_rate=0.001)
-
-# Evaluate model
-score = Score(model=train.model, data=data)
-results = score.compute_score()
-```
-
-## 📁 Project Structure
-
-```
-Grain-Challenge-M1-AI/
-├── README.md                 # This file
-├── requirements.txt          # Python dependencies
-├── download_dataset.sh       # Dataset download script
-├── data/                     # Dataset directory
-│   ├── Grain-Data-RGB/      # Extracted dataset (after download)
-└── src/                      # Source code
-    └── read_grain_rgb_data.ipynb  # Data exploration notebook
-```
+This notebook serves as a complete entry point for challenge participants. It provides an end-to-end pipeline covering exploratory data analysis, domain-specific dataset optimizations, the implementation of a baseline deep learning architecture (**ResNet-18**), and instructions on how to package your model for submission. Participants are encouraged to understand the baseline provided here and improve upon it.
 
 ---
 
-For questions or issues, please refer to the notebook documentation or open an issue.
+## Challenge Overview & Problem Setting
+
+The task is **multi-class classification of all 8 grain varieties from spectral RGB images**, specifically structured as a yearly benchmark evaluating models independently on the **2019** and **2020** datasets. Each sample is a 252×252 image captured at specific spectral bands [22, 53, 89], and the primary goal is to accurately map grains into **8 distinct variety classes**. Recognizing grain varieties quickly and accurately is crucial for agricultural quality control and logistics.
+
+| Aspect | Detail |
+|---|---|
+| **Objective** | Classify grain variety from a single seed image |
+| **Classes** | 8 varieties (labels 1–8) |
+| **Training set** | 10,888 images (Filtered to Year 1 only) |
+| **Test set** | 2,723 images (hidden during Codabench evaluation) |
+| **Image size** | 252 × 252 × 3 (int16) |
+| **Evaluation metric** | **Classification Accuracy** (primary metric for ranking)|
+| **Constraint** | ≤ 20 minutes on Codabench GPU |
+
+---
+
+## Organizers & Credits
+
+| Member |
+|---|
+| Oudoum Ali Houmed |
+| Abderrahmane Moujar |
+| Daryl Okou |
+| Olutola Paul |
+| Ran Lu |
+| Cristian-Ioan Bratu |
+
+---
