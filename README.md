@@ -1,7 +1,7 @@
 #  Grain Challenge — M1 AI 2025-26
 
 > **Multi-class classification of 8 grain varieties from spectral RGB images.**  
-> Hosted on [Codabench](https://www.codabench.org/) · Organized as part of the M1 AI curriculum.
+> Hosted on [Codabench](https://www.codabench.org/competitions/13150/) · Organized as part of the M1 AI curriculum.
 
 [![Open Starter Kit in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/moujar/Grain-Challenge-M1-AI/blob/main/starter_kit/README.ipynb)
 
