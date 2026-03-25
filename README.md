@@ -62,7 +62,7 @@ Grain-Challenge/
 │   ├── README.ipynb            # Jupyter notebook (open in Colab)
 │   ├── input_data/             # Dataset placeholder
 │   └── submission/
-│       └── model.py            # Baseline model (RandomForest + PCA)
+│       └── model.py            # Baseline model implementation
 ├── Codabench Bundle/
 │   ├── competition.yaml        # Codabench competition config
 │   ├── pages/                  # Challenge page content
@@ -94,7 +94,7 @@ The dataset is provided by **INRAE** from real post-harvest hyperspectral scans.
 - **Raw source:** 2048 × 9100 px hyperspectral images with 216 spectral channels
 - **Preprocessing:** Individual grains extracted via watershed segmentation, then reduced to 3 spectral bands (RGB-like)
 - **Final format:** 224 × 224 × 3 images, one per grain, with a class label (1–8)
-- **Split:** Structured as a **yearly benchmark** — models are trained on Year 1 data and evaluated on Year 2 data to test cross-year generalization
+- **Split:** Training and validation are both performed on the **same year of data**
 
 > The raw hyperspectral images are not provided. All images are already segmented and preprocessed.
 
@@ -144,7 +144,8 @@ Good starting point; interpretable and fast to train.
 ### Baseline 2 — ConvNeXt-Tiny (`Codabench Bundle/sample_code_submission/model.py`)
 
 A deep learning baseline using a pretrained ConvNeXt-Tiny backbone:
-- Pretrained weights included: `ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth`
+- Pretrained weights: `ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth` (**not included in this repo** due to GitHub's 100 MB file size limit — download it from the starter kit on the CodaBench competition page)
+- Trained and validated on the same year of data
 - Inference only (no retraining on Codabench)
 - Multi-crop × D4 test-time augmentation (4 crop sizes × 8 D4 transforms = 32 views per sample)
 - Runs on CPU or CUDA automatically
