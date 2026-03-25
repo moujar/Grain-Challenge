@@ -15,8 +15,8 @@ pages:
     file: pages/overview.md
   - title: Starting Kit
     file: pages/starting_kit.md
-  - file: pages/submission.md
-    title: Submission
+  - title: Submission
+    file: pages/submission.md
   - title: Data
     file: pages/data.md
   
@@ -25,8 +25,8 @@ phases:
   - index: 0
     name: Phase 1
     description: Feedback Phase
-    start: 2026-01-01 # YYYY-MM-DD
-    end: 2026-03-01 # YYYY-MM-DD
+    start: 2026-03-25 # YYYY-MM-DD
+    end: None # YYYY-MM-DD or None for no end date
     tasks:
       - 0
 
@@ -46,8 +46,7 @@ leaderboards:
   - index: 0 
     title: Results
     key: main_leaderboard
-    submission_rule: "Force_Latest_Multiple" # This can be changed, see the leaderboard rules here: https://docs.codabench.org/latest/Organizers/Benchmark_Creation/Leaderboard-Functionality/#submission-rules
-    # you can add multiple columns if you have multiple scores
+    submission_rule: "Force_Latest_Multiple" 
     columns:
       - index: 0
         title: Score

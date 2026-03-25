@@ -18,9 +18,9 @@ Participants must predict the **grain variety** for each test image.
 
 The main evaluation metric is **classification accuracy**.
 
-### Accuracy
+### Balanced Accuracy
 
-Accuracy measures the proportion of correctly classified samples:
+Balanced Accuracy measures the proportion of correctly classified samples and it's a better metric than accuracy when there is imbalance in the data:
 
 * A prediction is considered correct if the predicted label exactly matches the ground-truth label.
 * The final score is the percentage of correct predictions over all test samples.
@@ -29,29 +29,12 @@ This metric is simple, intuitive, and easy to interpret.
 
 ---
 
-## Secondary Considerations
-
-Although accuracy is the primary metric, participants should be aware that:
-
-* The dataset may contain **class imbalance**.
-* Some grain varieties may be under-represented.
-
-To build robust models, participants are encouraged to also monitor:
-
-* Per-class accuracy
-* Confusion matrices
-* Balanced or macro-averaged metrics during local validation
-
-These additional metrics are **not** used for official ranking but can help improve model quality.
-
----
-
 ## Evaluation Procedure
 
 1. Participants submit a prediction file through the Codabench platform.
 2. The platform runs the evaluation on a **hidden test set**.
 3. The predicted labels are compared to the ground-truth labels.
-4. The accuracy score is computed automatically.
+4. The balanced accuracy score is computed automatically.
 5. The score is displayed on the leaderboard.
 
 Ground-truth labels for the test set are **never shared** with participants.
@@ -60,8 +43,8 @@ Ground-truth labels for the test set are **never shared** with participants.
 
 ## Leaderboard
 
-* Submissions are ranked based on **accuracy**.
-* Higher accuracy results in a better rank.
+* Submissions are ranked based on **Balanced accuracy**.
+* Higher balanced accuracy results in a better rank.
 * In case of equal scores, submissions may share the same rank.
 
 Limits on the number of daily submissions may apply.
@@ -82,7 +65,6 @@ This is done to evaluate the **generalization ability** of the submitted models.
 ## Important Notes
 
 * Submissions with an invalid format will be rejected automatically.
-* Do not include any additional files or outputs in your submission.
 * Do not attempt to infer or access ground-truth labels.
 
 Failure to follow these rules may result in disqualification.

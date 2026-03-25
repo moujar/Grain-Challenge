@@ -1,8 +1,8 @@
 # Overview
 
-<img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/paris-saclay.png" alt="Université Paris-Saclay" width="140" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/inrae.png" alt="INRAE" width="110" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/lisn.png" alt="LISN" width="140" />
+<img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/paris-saclay.png" alt="Université Paris-Saclay" width="300" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/LISN-LOGO.png" alt="LISN" width="350" style="vertical-align: middle;" /> &nbsp;&nbsp; <img src="https://raw.githubusercontent.com/moujar/Grain-Challenge-M1-AI/main/assets/inrae.png" alt="INRAE" width="200" />
 
-*Organized by **Université Paris-Saclay**, **INRAE**, & **LISN** — M1 AI Challenge 2025-26*
+*Organized by **Université Paris-Saclay**, **LISN**, & **INRAE** — Grain Classification*
 
 ---
 
@@ -36,7 +36,7 @@ This is structured as a **yearly benchmark**: models are trained and evaluated o
 
 ---
 
-## 👥 Who Can Participate?
+## Who Can Participate?
 
 This challenge is designed for:
 
@@ -53,7 +53,7 @@ This challenge is designed for:
 1. **Create an account** on [Codabench](https://www.codabench.org/) and register for this competition.
 2. **Download the Starting Kit** from the **Files** tab — it includes the dataset, baseline code, and documentation.
 3. **Explore the data** using the provided Jupyter notebook.
-4. **Train your model** — start from the ResNet-18 baseline or build your own.
+4. **Train your model** — you can start from the ConvNeXt baseline and then build your own.
 5. **Submit** your `model.py` as a ZIP through the **My Submissions** tab.
 
 >  **Tip:** Open the starter notebook directly in Google Colab for a zero-setup experience:
@@ -65,7 +65,7 @@ This challenge is designed for:
 
 Submissions are evaluated on **classification accuracy** — the percentage of test images correctly classified.
 
-> `Accuracy = (Correct predictions) / (Total predictions)`
+> `Balanced Accuracy = (Recall₁ + Recall₂ + ... + Recallₙ) / n`
 
 Full details are on the **Evaluation** page. The leaderboard ranks participants by accuracy (higher is better).
 
@@ -73,12 +73,11 @@ Full details are on the **Evaluation** page. The leaderboard ranks participants 
 
 ## Baselines Provided
 
-Two baselines are included in the starting kit:
+A baseline is included in the starting kit:
 
-- **Random Forest** — Handcrafted features (histograms + statistics + PCA) → sklearn classifier. Found in `model.py` in the Starting Kit. Ready to submit as-is.
-- **ResNet-18** — End-to-end CNN trained from scratch with data augmentation & Test-Time Augmentation (TTA). Found in the Starter Notebook.
+- **ConvNeXt** — End-to-end convolutional neural network trained with data augmentation. This provides a strong modern baseline for image classification. The implementation is available in the Starter Notebook.
 
-Participants are encouraged to **beat these baselines** using deeper architectures (EfficientNet, ViT, …), better augmentation, ensembling, or any other technique.
+Participants are encouraged to **beat these baselines** using the same or other architectures (EfficientNet, ViT, …), better augmentation, ensembling, or any other technique.
 
 ---
 
@@ -89,7 +88,7 @@ Participants are encouraged to **beat these baselines** using deeper architectur
 - **Platform:** [Codabench](https://www.codabench.org/)
 
 **Challenge organizers:**
-Oudoum Ali Houmed · Abderrahmane Moujar · Daryl Okou · Olutola Paul · Ran Lu · Cristian-Ioan Bratu
+Oudoum Ali Houmed · Abderrahmane Moujar · Daryl Okou · Olutola Oloruntobi Paul · Ran Lu · Cristian-Ioan Bratu
 
 We thank **INRAE** for making this dataset available for educational and research purposes, and **Université Paris-Saclay** for supporting this initiative.
 

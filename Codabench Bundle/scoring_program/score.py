@@ -103,9 +103,9 @@ class Scoring:
 
     def compute_scores(self):
         """
-        Compute the accuracy score for the competition.
+        Compute the balanced accuracy score for the competition.
 
-        Accuracy = (number of correct predictions) / (total predictions)
+        Balanced Accuracy = average of per-class recall across all classes.
         """
         print("[*] Computing scores")
 
@@ -119,38 +119,45 @@ class Scoring:
             self.scores_dict = {"score": 0.0}
             return
 
-        # Count correct predictions
-        correct = 0
+        # Count per-class correct and total
+        class_correct = {}
+        class_total = {}
         total = 0
         missing_ground_truth = 0
 
         for grain_id, predicted_variety in self.ingestion_result.items():
             if grain_id in self.reference_data:
                 true_variety = self.reference_data[grain_id]
+                class_total[true_variety] = class_total.get(true_variety, 0) + 1
                 if int(predicted_variety) == int(true_variety):
-                    correct += 1
+                    class_correct[true_variety] = class_correct.get(true_variety, 0) + 1
                 total += 1
             else:
                 missing_ground_truth += 1
 
-        # Compute accuracy
-        if total > 0:
-            accuracy = correct / total
+        # Compute balanced accuracy (mean per-class recall)
+        if class_total:
+            per_class_recall = [
+                class_correct.get(cls, 0) / count
+                for cls, count in class_total.items()
+            ]
+            balanced_accuracy = sum(per_class_recall) / len(per_class_recall)
         else:
-            accuracy = 0.0
+            balanced_accuracy = 0.0
 
+        correct = sum(class_correct.values())
         print(f"[*] Correct predictions: {correct}/{total}")
-        print(f"[*] Accuracy: {accuracy:.4f} ({accuracy * 100:.2f}%)")
+        print(f"[*] Balanced Accuracy: {balanced_accuracy:.4f} ({balanced_accuracy * 100:.2f}%)")
 
         if missing_ground_truth > 0:
             print(f"[!] Warning: {missing_ground_truth} predictions had no ground truth")
 
         # Store scores - 'score' key matches competition.yaml leaderboard column
         self.scores_dict = {
-            "score": round(accuracy, 6),
+            "score": round(balanced_accuracy, 6),
             "correct": correct,
             "total": total,
-            "accuracy_percent": round(accuracy * 100, 2)
+            "balanced_accuracy_percent": round(balanced_accuracy * 100, 2)
         }
 
     def write_scores(self, output_dir):

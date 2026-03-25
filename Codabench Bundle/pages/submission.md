@@ -6,13 +6,32 @@ Download the **starter kit** from the **Files** section of the competition page.
 
 ---
 
+## Pretrained Model
+
+Submit your **pretrained model** as shown in the provided Colab notebook. Only **inference** will be run on CodaBench — your model will not be retrained during evaluation, so ensure your weights are saved and loaded correctly as demonstrated in the Colab.
+
+---
+
+## Training Code (Optional)
+
+You may include an additional file (any name **other than** `model.py`) that contains your training code or documents your training process. This allows us to review how the model was trained. This file will not be executed during evaluation.
+
+---
+
 ## Submission Format
 
-Your submission must be a **ZIP file** with the following structure:
+Open a terminal and navigate to the directory that contains model.py.
+
+Run the following command:
 
 ```
-submission.zip
-└── model.py          # Required: Your model implementation
+zip submission.zip model.py
 ```
 
-The `model.py` file must contain a `Model` class that implements the required methods as shown in the starter kit.
+If you are including a training code file, add it to the archive as well (replace `training.py` with your actual filename):
+
+```
+zip submission.zip model.py training.py
+```
+
+This will create a file named submission.zip containing your files at the root of the archive. Upload the generated submission.zip as your submission.
