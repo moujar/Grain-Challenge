@@ -30,7 +30,7 @@
 
 In real agricultural settings, different grain varieties are often **sown together** in the same field. After harvest, the final proportions of each variety can shift due to differences in growth rates, disease resistance, or local adaptation. Accurately identifying which grain belongs to which variety is essential for quality control and agronomic research.
 
-This challenge uses **hyperspectral imaging** — cameras that capture rich spectral information far beyond what the human eye can see — to distinguish between visually similar grain varieties. Your goal is to build a model that classifies individual grain images into one of **8 possible varieties**.
+This challenge uses **hyperspectral imaging** cameras that capture rich spectral information far beyond what the human eye can see to distinguish between visually similar grain varieties. Your goal is to build a model that classifies individual grain images into one of **8 possible varieties**.
 
 <p align="center">
   <img src="assets/grain-gallery.png" alt="Sample grain images across 8 varieties" width="560" />
