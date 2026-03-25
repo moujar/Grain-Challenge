@@ -109,7 +109,7 @@ Download the dataset from the **Files** tab on the Codabench competition page (i
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/moujar/Grain-Challenge-M1-AI/blob/main/starter_kit/README.ipynb)
 
-Zero setup required — the notebook loads the dataset and runs the baseline end-to-end.
+Zero setup required the notebook loads the dataset and runs the baseline end-to-end.
 
 ### 2. Clone & install locally
 
@@ -130,28 +130,14 @@ jupyter notebook README.ipynb
 
 ## Baselines
 
-Two baselines are provided to help you get started:
+### ConvNeXt-Tiny (`Codabench Bundle/sample_code_submission/model.py`)
 
-### Baseline 1 — RandomForest + PCA (`starter_kit/submission/model.py`)
-
-A classical ML pipeline using handcrafted features:
-- Color histograms (32 bins × 3 channels)
-- Per-channel statistics (mean, std, min, max, median, quartiles)
-- Downsampled 16 × 16 pixel values
-- StandardScaler + PCA (100 components) → RandomForest (200 trees)
-
-Good starting point; interpretable and fast to train.
-
-### Baseline 2 — ConvNeXt-Tiny (`Codabench Bundle/sample_code_submission/model.py`)
-
-A deep learning baseline using a pretrained ConvNeXt-Tiny backbone:
-- Pretrained weights: `ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth` (**not included in this repo** due to GitHub's 100 MB file size limit — download it from the starter kit on the CodaBench competition page)
+A deep learning baseline using a pretrained ConvNeXt-Tiny:
+- Pretrained weights: `ConvNeXt-Tiny.pth` (**not included in this repo** due to GitHub's 100 MB file size limit, download it from the starter kit on the CodaBench competition page)
 - Trained and validated on the same year of data
 - Inference only (no retraining on Codabench)
 - Multi-crop × D4 test-time augmentation (4 crop sizes × 8 D4 transforms = 32 views per sample)
-- Runs on CPU or CUDA automatically
-
-This is the **strong baseline** — beat it to climb the leaderboard.
+- Runs on CPU
 
 ---
 
@@ -172,11 +158,7 @@ class Model:
 ### Packaging
 
 ```bash
-# Minimal submission
-zip submission.zip model.py
-
-# With optional training code
-zip submission.zip model.py training.py
+zip submission.zip model.py your_weights.pth notebook.ipynb
 ```
 
 Upload `submission.zip` via the **My Submissions** tab on Codabench.
@@ -198,45 +180,6 @@ Balanced Accuracy = (Recall_1 + Recall_2 + ... + Recall_8) / 8
 - The test set includes grains from different crop years to assess generalization
 
 ---
-
-## Recommended Approaches
-
-Participants are encouraged to experiment with:
-
-- **Architectures:** EfficientNet, Vision Transformer (ViT), Swin Transformer
-- **Data augmentation:** Random crops, flips, colour jitter, mixup
-- **Transfer learning:** Fine-tune ImageNet-pretrained backbones
-- **Ensembling:** Combine predictions from multiple models
-- **Test-time augmentation (TTA):** Average predictions over multiple views
-
----
-
-## Requirements
-
-```
-numpy>=1.20.0
-pandas>=1.3.0
-torch>=1.9.0
-torchvision>=0.10.0
-scikit-learn>=0.24.0
-matplotlib>=3.3.0
-seaborn>=0.11.0
-requests>=2.25.0
-tqdm>=4.60.0
-huggingface_hub>=0.10.0
-jupyter>=1.0.0
-```
-
----
-
-## Organizers
-
-- Oudoum Ali Houmed
-- Abderrahmane Moujar
-- Daryl Okou
-- Olutola Oloruntobi Paul
-- Ran Lu
-- Cristian-Ioan Bratu
 
 **Institutions:** [Université Paris-Saclay](https://www.universite-paris-saclay.fr/) · [LISN](https://www.lisn.upsaclay.fr/) · [INRAE](https://www.inrae.fr/)
 
