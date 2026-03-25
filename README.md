@@ -1,4 +1,5 @@
-# Grain Variety Classification Challenge — M1 AI 2025–26
+# Grain Variety Classification Challenge
+
 
 <p align="center">
   <img src="assets/paris-saclay.png" alt="Université Paris-Saclay" height="60" />
