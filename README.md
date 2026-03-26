@@ -1,4 +1,4 @@
-# Grain Variety Classification Challenge
+# INRAE Wheat Grain Variety Classification Challenge
 
 
 <p align="center">
