@@ -1,18 +1,209 @@
-# Model file which contains a model class in scikit-learn style
-# Model class must have these 3 methods
-# - __init__: initializes the model
-# - fit: trains the model
-# - predict: uses the model to perform predictions
+# =============================================================================
+# IMPORTANT — WEIGHTS FILE NOT INCLUDED (GitHub file size restriction)
+# =============================================================================
+# This model requires the pretrained weights file:
 #
-# Created on: 30 Jan, 2026
+#   ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth
+#
+# This file could NOT be uploaded to GitHub because it exceeds the 100 MB
+# file size limit enforced by GitHub.
+#
+# To use this model you must download the weights file separately and place
+# it alongside this model.py file before running or submitting.
+#
+# When submitting to CodaBench, include the .pth file in your ZIP:
+#
+#   zip submission.zip model.py ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth
+#
+# Download the complete starter kit from the CodaBench competition page —
+# it includes the weights file and everything else you need to get started.
+# =============================================================================
+
+import subprocess
+import sys
+
+def _install(package, index_url=None):
+    cmd = [sys.executable, "-m", "pip", "install", "--quiet", package]
+    if index_url:
+        cmd += ["--index-url", index_url]
+    subprocess.check_call(cmd)
+
+_CPU_INDEX = "https://download.pytorch.org/whl/cpu"
+
+for _pkg, _idx in [
+    ("numpy",       None),
+    ("torch",       _CPU_INDEX),
+    ("torchvision", _CPU_INDEX),
+]:
+    try:
+        __import__(_pkg)
+    except ImportError:
+        print(f"[*] Installing {_pkg} ...")
+        _install(_pkg, _idx)
+
+import os
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+
 
 # ----------------------------------------
-# Imports
+# Dataset
 # ----------------------------------------
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+_CH_SCALE    = [1567.0, 8316.0, 18126.0]
+_IMGNET_MEAN = [0.485,  0.456,  0.406]
+_IMGNET_STD  = [0.229,  0.224,  0.225]
+
+
+class GrainDataset(Dataset):
+    def __init__(self, X, crop_size=176):
+        self.X  = X
+        self.cs = crop_size
+        self.scale = torch.tensor(_CH_SCALE).view(3, 1, 1)
+        self.mean  = torch.tensor(_IMGNET_MEAN).view(3, 1, 1)
+        self.std   = torch.tensor(_IMGNET_STD).view(3, 1, 1)
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        img = self.X[idx]
+        if img.dtype != np.float32:
+            img = img.astype(np.float32, copy=False)
+        x = torch.from_numpy(img).permute(2, 0, 1).contiguous()
+        x = (x / self.scale).clamp_(0.0, 1.0)
+        _, H, W = x.shape
+        s = self.cs
+        if H > s and W > s:
+            top  = (H - s) // 2
+            left = (W - s) // 2
+            x    = x[:, top:top + s, left:left + s]
+        x = (x - self.mean) / self.std
+        return x
+
+
+# ----------------------------------------
+# ConvNeXt-Tiny Architecture (no torchvision)
+# ----------------------------------------
+class _DropPath(nn.Module):
+    def __init__(self, p=0.0):
+        super().__init__()
+        self.p = p
+
+    def forward(self, x):
+        if not self.training or self.p == 0.0:
+            return x
+        keep = 1.0 - self.p
+        mask = (torch.rand((x.shape[0],) + (1,) * (x.ndim - 1),
+                           dtype=x.dtype, device=x.device) + keep).floor_()
+        return x * mask / keep
+
+
+class _LayerNorm2d(nn.Module):
+    def __init__(self, c, eps=1e-6):
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(c))
+        self.bias   = nn.Parameter(torch.zeros(c))
+        self.eps    = eps
+
+    def forward(self, x):
+        u = x.mean(1, keepdim=True)
+        s = (x - u).pow(2).mean(1, keepdim=True)
+        x = (x - u) / (s + self.eps).sqrt()
+        return self.weight[None, :, None, None] * x + self.bias[None, :, None, None]
+
+
+class _CNBlock(nn.Module):
+    def __init__(self, dim, drop_path=0.0, ls_init=1e-6):
+        super().__init__()
+        self.dw  = nn.Conv2d(dim, dim, 7, padding=3, groups=dim)
+        self.ln  = _LayerNorm2d(dim)
+        self.pw1 = nn.Conv2d(dim, 4 * dim, 1)
+        self.act = nn.GELU()
+        self.pw2 = nn.Conv2d(4 * dim, dim, 1)
+        self.ls  = nn.Parameter(ls_init * torch.ones(1, dim, 1, 1))
+        self.dp  = _DropPath(drop_path) if drop_path > 0 else nn.Identity()
+
+    def forward(self, x):
+        h = self.dw(x)
+        h = self.ln(h)
+        h = self.pw1(h)
+        h = self.act(h)
+        h = self.pw2(h)
+        return x + self.dp(self.ls * h)
+
+
+class _CNDown(nn.Module):
+    def __init__(self, ci, co):
+        super().__init__()
+        self.ln = _LayerNorm2d(ci)
+        self.cv = nn.Conv2d(ci, co, 2, stride=2)
+
+    def forward(self, x):
+        return self.cv(self.ln(x))
+
+
+_DIMS   = [96, 192, 384, 768]
+_DEPTHS = [ 3,   3,   9,   3]
+
+
+class ConvNeXtTiny(nn.Module):
+    def __init__(self, num_classes=8):
+        super().__init__()
+        self.stem = nn.Sequential(
+            nn.Conv2d(3, _DIMS[0], 4, stride=4), _LayerNorm2d(_DIMS[0]))
+        total = sum(_DEPTHS)
+        dp    = [0.0] * total          # drop_path=0 at inference
+        bi    = 0
+        self.stages = nn.ModuleList()
+        self.downs  = nn.ModuleList()
+        for si in range(4):
+            stage = nn.Sequential(
+                *[_CNBlock(_DIMS[si], dp[bi + j]) for j in range(_DEPTHS[si])])
+            self.stages.append(stage)
+            bi += _DEPTHS[si]
+            if si < 3:
+                self.downs.append(_CNDown(_DIMS[si], _DIMS[si + 1]))
+        self.norm    = nn.LayerNorm(_DIMS[-1], eps=1e-6)
+        self.dropout = nn.Dropout(p=0.0)   # disabled at inference
+        self.head    = nn.Linear(_DIMS[-1], num_classes)
+
+    def forward(self, x):
+        x = self.stem(x)
+        for i, st in enumerate(self.stages):
+            x = st(x)
+            if i < 3:
+                x = self.downs[i](x)
+        x = self.norm(x.mean([2, 3]))
+        return self.head(self.dropout(x))
+
+
+# ----------------------------------------
+# Weight loading
+# ----------------------------------------
+def _load_weights():
+    WEIGHT_FILE = "ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth"
+    search_dirs = [
+        os.path.dirname(os.path.abspath(__file__)),
+        ".",
+        os.getcwd(),
+        "/app/submission",
+        "/app/output",
+        "/app/program",
+        "/tmp",
+    ]
+    for d in search_dirs:
+        p = os.path.join(d, WEIGHT_FILE)
+        if os.path.isfile(p):
+            print("[*] Loading weights:", p,
+                  "(%d MB)" % (os.path.getsize(p) // 1_000_000))
+            return torch.load(p, map_location="cpu", weights_only=True)
+    raise FileNotFoundError(
+        "ConvNeXt-Tiny_Y1toY2_head_ft_50ep.pth not found. "
+        "Place the .pth file alongside model.py in the submission ZIP."
+    )
 
 
 # ----------------------------------------
@@ -22,208 +213,78 @@ class Model:
 
     def __init__(self):
         """
-        This is a constructor for initializing classifier
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
+        Load ConvNeXt-Tiny with pre-trained Y1→Y2 weights.
+        The network is ready for inference immediately after __init__.
         """
-        print("[*] - Initializing Classifier")
+        print("[*] ConvNeXt-Tiny | inference only | Y1→Y2 weights")
 
-        # Optimized RandomForest classifier
-        self.clf = RandomForestClassifier(
-            n_estimators=200,        # More trees for better accuracy
-            max_depth=30,            # Deeper trees
-            min_samples_split=5,     # Prevent overfitting
-            min_samples_leaf=2,      # Prevent overfitting
-            max_features='sqrt',     # Use sqrt of features per split
-            n_jobs=-1,               # Use all CPU cores
-            random_state=42,
-            class_weight='balanced'  # Handle class imbalance
-        )
+        self.nc        = 8
+        self.label_off = 1    # labels are 1-8, model indices 0-7
+        self.device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.use_amp   = self.device.type == "cuda"
+        print("[*] Device:", self.device)
 
-        # Scaler for normalizing features
-        self.scaler = StandardScaler()
+        state = _load_weights()
 
-        # PCA for dimensionality reduction (faster training, less overfitting)
-        self.pca = PCA(n_components=100, random_state=42)
-        self.use_pca = True
+        net = ConvNeXtTiny(self.nc).to(self.device)
+        net.load_state_dict(state, strict=False)
+        net.eval()
 
-        # Number of histogram bins per channel
-        self.n_bins = 32
-
-    def _extract_color_histogram(self, img):
-        """
-        Extract color histogram features from an image.
-
-        Parameters
-        ----------
-        img: numpy array of shape (H, W, C)
-
-        Returns
-        -------
-        hist: 1D numpy array of histogram features
-        """
-        histograms = []
-        for c in range(img.shape[2]):
-            channel = img[:, :, c].flatten()
-            # Normalize to 0-1 range
-            if channel.max() > 1:
-                channel = channel / 255.0
-            hist, _ = np.histogram(channel, bins=self.n_bins, range=(0, 1))
-            hist = hist / (hist.sum() + 1e-8)  # Normalize histogram
-            histograms.append(hist)
-        return np.concatenate(histograms)
-
-    def _extract_statistics(self, img):
-        """
-        Extract statistical features from an image.
-
-        Parameters
-        ----------
-        img: numpy array of shape (H, W, C)
-
-        Returns
-        -------
-        stats: 1D numpy array of statistical features
-        """
-        stats = []
-        for c in range(img.shape[2]):
-            channel = img[:, :, c]
-            stats.extend([
-                np.mean(channel),
-                np.std(channel),
-                np.min(channel),
-                np.max(channel),
-                np.median(channel),
-                np.percentile(channel, 25),
-                np.percentile(channel, 75),
-            ])
-        return np.array(stats)
-
-    def _extract_features(self, X):
-        """
-        Extract features from images using multiple methods.
-
-        Parameters
-        ----------
-        X: numpy array of shape (n_samples, H, W, C)
-
-        Returns
-        -------
-        features: numpy array of shape (n_samples, n_features)
-        """
-        if isinstance(X, list):
-            X = np.array(X)
-
-        n_samples = X.shape[0]
-        features_list = []
-
-        for i in range(n_samples):
-            img = X[i]
-
-            # 1. Color histograms (n_bins * 3 channels = 96 features)
-            hist_features = self._extract_color_histogram(img)
-
-            # 2. Statistical features (7 stats * 3 channels = 21 features)
-            stat_features = self._extract_statistics(img)
-
-            # 3. Downsampled image (reduce resolution for faster processing)
-            # Resize to smaller size using simple averaging
-            h, w = img.shape[:2]
-            new_h, new_w = 16, 16  # Downsample to 16x16
-            block_h, block_w = h // new_h, w // new_w
-
-            if block_h > 0 and block_w > 0:
-                downsampled = img[:block_h * new_h, :block_w * new_w].reshape(
-                    new_h, block_h, new_w, block_w, -1
-                ).mean(axis=(1, 3))
-            else:
-                downsampled = img[:new_h, :new_w]
-
-            flat_features = downsampled.flatten()
-
-            # Combine all features
-            combined = np.concatenate([hist_features, stat_features, flat_features])
-            features_list.append(combined)
-
-        return np.array(features_list)
+        self.net = net
+        print("[*] Model ready")
 
     def fit(self, train_data):
         """
-        This function trains the model provided training data
-
-        Parameters
-        ----------
-        train_data: dict
-            contains train data and labels
-            - 'X': numpy array of images (n_samples, height, width, channels)
-            - 'y': numpy array of labels (n_samples,)
-
-        Returns
-        -------
-        None
+        No-op — weights are pre-loaded from the .pth file.
+        The platform calls this method but no training is performed.
         """
-        print("[*] - Training Classifier on the train set")
-
-        # Extract features and labels
-        X = train_data['X']
-        y = train_data['y']
-
-        # Extract features from images
-        print("[*] - Extracting features...")
-        X_features = self._extract_features(X)
-        print(f"[*] - Extracted {X_features.shape[1]} features per sample")
-
-        # Scale features
-        X_scaled = self.scaler.fit_transform(X_features)
-
-        # Apply PCA for dimensionality reduction
-        if self.use_pca and X_scaled.shape[1] > self.pca.n_components:
-            print(f"[*] - Applying PCA: {X_scaled.shape[1]} -> {self.pca.n_components} dimensions")
-            X_scaled = self.pca.fit_transform(X_scaled)
-
-        # Train the classifier
-        print(f"[*] - Training on {X_scaled.shape[0]} samples with {X_scaled.shape[1]} features")
-        self.clf.fit(X_scaled, y)
-        print("[*] - Training complete")
+        print("[*] fit() called — using pre-trained weights, no training performed")
 
     def predict(self, test_data):
         """
-        This function predicts labels on test data.
+        Predict grain variety labels using multi-crop × D4 TTA.
+
+        4 crop sizes × 8 D4 augmentations = 32 views per sample.
 
         Parameters
         ----------
-        test_data: dict
-            contains test data
-            - 'X': numpy array of images (n_samples, height, width, channels)
+        test_data : dict
+            'X': numpy array (n_samples, H, W, C)
 
         Returns
         -------
-        y: 1D numpy array
-            predicted labels
+        y : 1D numpy array of integer labels in [1, 8]
         """
-        print("[*] - Predicting test set using trained Classifier")
+        print("[*] - Predicting test set using ConvNeXt-Tiny")
 
-        # Extract features
-        X = test_data['X']
+        X     = test_data['X']
+        n     = X.shape[0]
+        crops = [160, 172, 184, 196]
+        probs = torch.zeros(n, self.nc)
 
-        # Extract features from images
-        X_features = self._extract_features(X)
+        for cs in crops:
+            ds  = GrainDataset(X, crop_size=cs)
+            ld  = DataLoader(ds, batch_size=64, shuffle=False,
+                             num_workers=0, pin_memory=False)
+            off = 0
+            with torch.no_grad():
+                for xb in ld:
+                    xb  = xb.to(self.device, non_blocking=True)
+                    bs_ = xb.size(0)
+                    acc = torch.zeros(bs_, self.nc, device=self.device)
+                    for hf in (False, True):              # flip / no flip
+                        for rot in range(4):              # 0°, 90°, 180°, 270°
+                            xa = xb.flip(3) if hf else xb
+                            if rot:
+                                xa = torch.rot90(xa, rot, [2, 3])
+                            try:
+                                with torch.amp.autocast("cuda", enabled=self.use_amp):
+                                    acc += F.softmax(self.net(xa), dim=1)
+                            except Exception:
+                                acc += F.softmax(self.net(xa), dim=1)
+                    probs[off:off + bs_] += acc.cpu()
+                    off += bs_
 
-        # Scale features
-        X_scaled = self.scaler.transform(X_features)
-
-        # Apply PCA
-        if self.use_pca and hasattr(self.pca, 'components_'):
-            X_scaled = self.pca.transform(X_scaled)
-
-        # Predict
-        y = self.clf.predict(X_scaled)
-
-        print(f"[*] - Predicted {len(y)} samples")
-        return y
+        predictions = probs.argmax(1).numpy().astype(np.int64) + self.label_off
+        print(f"[*] - Predicted {len(predictions)} samples")
+        return predictions
