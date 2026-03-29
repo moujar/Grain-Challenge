@@ -107,7 +107,7 @@ Download the dataset from the **Files** tab on the Codabench competition page (i
 
 ### 1. Open the Starter Notebook in Colab (recommended)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/moujar/Grain-Challenge-M1-AI/blob/main/starter_kit/README.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1hSLKf8Bk5tDuB-V5FbLQuuYhJI_8CYPT#scrollTo=U6HSedIk4yD-)
 
 Zero setup required the notebook loads the dataset and runs the baseline end-to-end.
 
